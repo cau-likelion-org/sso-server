@@ -29,7 +29,9 @@ environ.Env.read_env(
 
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
-
+STATE = env('STATE')
+SOCIAL_AUTH_GOOGLE_CLIENT_ID = env('SOCIAL_AUTH_GOOGLE_CLIENT_ID')
+SOCIAL_AUTH_GOOGLE_SECRET = env('SOCIAL_AUTH_GOOGLE_SECRET')
 
 ALLOWED_HOSTS = []
 
@@ -42,6 +44,7 @@ DJANGO_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
 ]
 
 PROJECT_APPS = [
@@ -49,10 +52,37 @@ PROJECT_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
-
+    'rest_framework',
+    'rest_framework.authtoken',
+    'rest_framework_simplejwt',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + PROJECT_APPS + THIRD_PARTY_APPS
+
+# 사이트는 1개만 사용할 것이라고 명시
+SITE_ID = 1
+
+AUTH_USER_MODEL = 'accounts.User'
+
+# 나중에 dj_rest_auth.registration.views.SocialLoginView을 쓰기 위해 추가
+REST_USE_JWT = True
+
+ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'  # username 필드 사용 X
+ACCOUNT_EMAIL_REQUIRED = True                   # email 필드 사용 O
+ACCOUNT_USERNAME_REQUIRED = False               # username 필드 사용 X
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -62,6 +92,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
