@@ -11,27 +11,33 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+from django.core.exceptions import *
 import os
-import environ
+import json
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-env = environ.Env(
-    DEBUG=(bool, False)
-)
-environ.Env.read_env(
-    env_file = os.path.join(BASE_DIR, '.env')
-)
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
-SECRET_KEY = env('SECRET_KEY')
-DEBUG = env('DEBUG')
-STATE = env('STATE')
-SOCIAL_AUTH_GOOGLE_CLIENT_ID = env('SOCIAL_AUTH_GOOGLE_CLIENT_ID')
-SOCIAL_AUTH_GOOGLE_SECRET = env('SOCIAL_AUTH_GOOGLE_SECRET')
+secret_file = os.path.join(BASE_DIR, 'secrets.json') # secrets.json 파일 위치를 명시
+
+with open(secret_file) as f:
+    secrets = json.loads(f.read())
+
+def get_secret(setting, secrets=secrets):
+    try:
+        return secrets[setting]
+    except KeyError:
+        error_msg = "Set the {} environment variable".format(setting)
+        raise ImproperlyConfigured(error_msg)
+
+SECRET_KEY = get_secret('SECRET_KEY')
+DEBUG = get_secret('DEBUG')
+STATE = get_secret('STATE')
+SOCIAL_AUTH_GOOGLE_CLIENT_ID = get_secret('SOCIAL_AUTH_GOOGLE_CLIENT_ID')
+SOCIAL_AUTH_GOOGLE_SECRET = get_secret('SOCIAL_AUTH_GOOGLE_SECRET')
 
 ALLOWED_HOSTS = []
 
